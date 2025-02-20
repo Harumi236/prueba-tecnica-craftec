@@ -13,38 +13,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # Step 2: Set up Docker Buildx (for building multi-platform images)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Step 3: Build the Docker image
       - name: Build Docker image
         run: |
           cd nginx
           docker build -t mynginx .
 
-      - name: Login to Docker Hub
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      # Step 4: Set up Docker Compose to deploy
+      - name: Deploy with Docker Compose
         run: |
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-      - name: Tag and push Docker image
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          docker tag mynginx $DOCKER_USERNAME/mynginx:latest
-          docker push $DOCKER_USERNAME/mynginx:latest
-
-      - name: Deploy to Remote Server via SSH
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} user@your-server-ip << 'EOF'
-            docker pull $DOCKER_USERNAME/mynginx:latest
-            docker stop nginx-container || true
-            docker rm nginx-container || true
-            docker run -d --name nginx-container -p 80:80 $DOCKER_USERNAME/mynginx:latest
-          EOF
+          docker-compose -f docker-compose.yml up -d --build
