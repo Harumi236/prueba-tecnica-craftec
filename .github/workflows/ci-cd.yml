@@ -1,0 +1,50 @@
+name: CI/CD Pipeline for Nginx
+
+on:
+  push:
+    paths:
+      - 'nginx/index.html'
+  pull_request:
+    paths:
+      - 'nginx/index.html'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          cd nginx
+          docker build -t mynginx .
+
+      - name: Login to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      - name: Tag and push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        run: |
+          docker tag mynginx $DOCKER_USERNAME/mynginx:latest
+          docker push $DOCKER_USERNAME/mynginx:latest
+
+      - name: Deploy to Remote Server via SSH
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} user@your-server-ip << 'EOF'
+            docker pull $DOCKER_USERNAME/mynginx:latest
+            docker stop nginx-container || true
+            docker rm nginx-container || true
+            docker run -d --name nginx-container -p 80:80 $DOCKER_USERNAME/mynginx:latest
+          EOF
