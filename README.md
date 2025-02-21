@@ -8,7 +8,6 @@
 
 ## Contenido
 - Diagrama de Red
-- Descripción del diagrama de Red
 - Docker Compose de un frontend en react y un backend en django
 - Nginx default index.html dockerizado y con CI/CD
 
