@@ -5,6 +5,7 @@
 - [Requerimientos](#requerimientos-iniciales)
 - [Instalacion](#instalación)
 - [Aplicacion](#aplicación)
+- [Terraform](#terraform)
 
 ## Contenido
 - Diagrama de Red
@@ -106,4 +107,46 @@ docker build -t django-backend .
 docker run -d -p 8000:8000 django-backend
 ```
 
+### Terraform
+Se incluye un main.tf para la automatización de despliegue de infraestructura en AWS, sin embargo el código no fue testeado
 
+Para utilizar este setup de Terraform seguir estos pasos
+
+1. **Instalar Terraform**   
+  Si no tiene Terraform instalado, puede seguir la guía de instalación oficial: [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+
+2. **Configurar credenciales de AWS**  
+  Configure sus credenciales de AWS utilizando el AWS CLI:
+  ```bash
+  aws configure
+  ```
+
+3. **Inicializar Terraform**  
+  Navegue al directorio donde se encuentra el archivo `main.tf` y ejecute el siguiente comando para inicializar Terraform:
+  ```bash
+  terraform init
+  ```
+
+4. **Planificar la infraestructura**  
+  Ejecute el siguiente comando para crear un plan de ejecución. Esto le mostrará qué recursos serán creados, modificados o destruidos:
+  ```bash
+  terraform plan
+  ```
+
+5. **Aplicar el plan de Terraform**  
+  Si está satisfecho con el plan, puede aplicar los cambios para crear la infraestructura:
+  ```bash
+  terraform apply
+  ```
+
+6. **Verificar la infraestructura**  
+  Una vez que Terraform haya terminado de aplicar los cambios, puede verificar que la infraestructura se haya creado correctamente en la consola de AWS.
+
+7. **Destruir la infraestructura**  
+  Si desea destruir la infraestructura creada por Terraform, puede ejecutar el siguiente comando:
+  ```bash
+  terraform destroy
+  ```
+
+#### Disclaimer: 
+Esta configuracion es una implementacion conceptual y seguramente requiera ajustes para funcionar correctamente.
