@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+
+  db:
+    container_name: database
+    image: postgres:12.0-alpine
+    env_file: ./backend/.env.postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  backend:
+    container_name: back
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    env_file: ./backend/.env
+    environment:
+    - DATABASE=postgres
+    - SQL_HOST=database
+    - SQL_PORT=5432
+    volumes:
+      - ./backend:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  
+  frontend:
+    container_name: front
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./frontend:/app
+    ports:
+      - 3000:3000
+    depends_on:
+    - backend
+
+volumes:
+  postgres_data:
+  static:
+  media:
